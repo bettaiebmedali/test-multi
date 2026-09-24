@@ -28,24 +28,9 @@ pipeline {
             }
         }
 
-        stage('Build Docker') {
-            steps {
-                script {
-                    docker.build("${APP_NAME}:${APP_VERSION}")
-                }
-            }
-        }
+   
 
-        stage('Push Docker') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker_hub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    bat '''
-                        echo "$PASS" | docker login -u "$USER" --password-stdin
-                        docker push ${APP_NAME}:${APP_VERSION}
-                    '''
-                }
-            }
-        }
+      
 
         stage('Deploy') {
             when { branch 'main' }
