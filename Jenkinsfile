@@ -1,56 +1,29 @@
 pipeline {
     agent any
-
+    environment {
+        APP_NAME = 'my-app'
+    }
     stages {
-
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/bettaiebmedali/test-multi.git'
-            }
-        }
-
-        stage('Charger .env') {
+        stage('Build') {
             steps {
                 script {
-                    def envFile = readFile('.env').split("\n")
-
-                    for (line in envFile) {
-                        line = line.trim()
-
-                        if (line && !line.startsWith('#')) {
-                            def parts = line.split('=', 2)
-
-                            if (parts.size() == 2) {
-                                env[parts[0].trim()] = parts[1].trim()
-                            }
-                        }
-                    }
-
-                    echo "Application : ${env.APP_NAME}"
-                    echo "Version : ${env.APP_VERSION}"
+                    def buildVersion = "1.0.${env.BUILD_NUMBER}"
+                    echo "Building ${APP_NAME} version ${buildVersion}"
                 }
             }
         }
-
-        stage('Deploy') {
-            when {
-                branch 'main'
-            }
-
+        stage('Test') {
             steps {
-                echo "Déploiement de ${env.APP_NAME}:${env.APP_VERSION} sur PROD..."
+                echo "Testing ${APP_NAME}..."
             }
         }
-    }
-
-    post {
-        success {
-            echo "Build réussi pour ${env.APP_NAME}:${env.APP_VERSION}"
-        }
-
-        failure {
-            echo "Echec du build ${env.APP_NAME ?: 'application inconnue'}"
+        stage('Deploy') {
+            steps {
+                script {
+                    def buildVersion = "1.0.${env.BUILD_NUMBER}"
+                    echo "Deploying ${APP_NAME} version ${buildVersion}"
+                }
+            }
         }
     }
 }
