@@ -36,8 +36,7 @@ pipeline {
 
                         line = line.trim()
 
-                        // Ignore les lignes vides
-                        // et les commentaires
+                        // Ignore les lignes vides et les commentaires
                         if (line && !line.startsWith('#')) {
 
                             def parts = line.split('=', 2)
@@ -104,7 +103,7 @@ pipeline {
 
                 withCredentials([
                     string(
-                        credentialsId: 'DOCKER_PASSWORD',
+                        credentialsId: 'DOCKER_PASSWORD_MEDALI',
                         variable: 'DOCKER_PASSWORD'
                     )
                 ]) {
