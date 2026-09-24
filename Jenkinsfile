@@ -5,10 +5,10 @@ pipeline {
     environment {
 
         // Utilisateur Docker Hub
-        DOCKER_USER = 'vincentsono'
+        DOCKER_USER = 'dockerID'
 
         // Repository Docker en minuscules
-        DOCKER_IMAGE = 'vincentsono/microapp'
+        DOCKER_IMAGE = 'dockerID/microapp'
 
         // Variables applicatives
         APP_NAME = ''
@@ -104,7 +104,7 @@ pipeline {
 
                 withCredentials([
                     string(
-                        credentialsId: 'DOCKER_PASSWORD_VINCENT',
+                        credentialsId: 'DOCKER_PASSWORD',
                         variable: 'DOCKER_PASSWORD'
                     )
                 ]) {
