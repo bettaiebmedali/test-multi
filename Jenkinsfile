@@ -8,7 +8,7 @@ pipeline {
         DOCKER_USER = 'medbettaieb'
 
         // Repository Docker en minuscules
-        DOCKER_IMAGE = 'dockerID/microapp'
+        DOCKER_IMAGE = 'medbettaieb/microapp'
 
         // Variables applicatives
         APP_NAME = ''
