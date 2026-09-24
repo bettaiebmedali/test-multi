@@ -56,11 +56,11 @@ pipeline {
     }
 
     post {
-        success {
-            echo "✅ Build réussi pour ${APP_NAME}:${APP_VERSION}"
-        }
-        failure {
-            echo "❌ Échec du build ${APP_NAME}"
-        }
+    success {
+        echo "✅ Build réussi pour ${env.APP_NAME}:${env.APP_VERSION}"
     }
+    failure {
+        echo "❌ Échec du build ${env.APP_NAME}"
+    }
+}
 }
