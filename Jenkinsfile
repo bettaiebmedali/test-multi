@@ -1,51 +1,58 @@
+```groovy
 pipeline {
     agent any
 
-    environment {
-        DOCKER_CREDS = credentials('docker_hub')
-        ENV_FILE = readFile('.env').split("\n")
-    }
-
     stages {
+
         stage('Checkout') {
             steps {
-                git branch: "${env.BRANCH_NAME}", url: 'https://github.com/bettaiebmedali/test-multi'
+                git branch: "${env.BRANCH_NAME}",
+                    url: 'https://github.com/bettaiebmedali/test-multi.git'
             }
         }
 
         stage('Charger .env') {
             steps {
                 script {
-                    for (line in ENV_FILE) {
-                        if (line.trim() && !line.startsWith('#')) {
-                            def parts = line.tokenize('=')
-                            env[parts[0]] = parts[1]
+                    def envFile = readFile('.env').split("\n")
+
+                    for (line in envFile) {
+                        line = line.trim()
+
+                        if (line && !line.startsWith('#')) {
+                            def parts = line.split('=', 2)
+
+                            if (parts.size() == 2) {
+                                env[parts[0].trim()] = parts[1].trim()
+                            }
                         }
                     }
-                    echo "Application : ${APP_NAME}"
-                    echo "Version : ${APP_VERSION}"
+
+                    echo "Application : ${env.APP_NAME}"
+                    echo "Version : ${env.APP_VERSION}"
                 }
             }
         }
 
-   
-
-      
-
         stage('Deploy') {
-            when { branch 'main' }
+            when {
+                branch 'main'
+            }
+
             steps {
-                echo "Déploiement de ${APP_NAME}:${APP_VERSION} sur PROD..."
+                echo "Déploiement de ${env.APP_NAME}:${env.APP_VERSION} sur PROD..."
             }
         }
     }
 
     post {
-    success {
-        echo "✅ Build réussi pour ${env.APP_NAME}:${env.APP_VERSION}"
-    }
-    failure {
-        echo "❌ Échec du build ${env.APP_NAME}"
+        success {
+            echo "✅ Build réussi pour ${env.APP_NAME}:${env.APP_VERSION}"
+        }
+
+        failure {
+            echo "❌ Échec du build ${env.APP_NAME ?: 'application inconnue'}"
+        }
     }
 }
-}
+```
