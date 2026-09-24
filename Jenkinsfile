@@ -1,4 +1,3 @@
-```groovy
 pipeline {
     agent any
 
@@ -47,12 +46,11 @@ pipeline {
 
     post {
         success {
-            echo "✅ Build réussi pour ${env.APP_NAME}:${env.APP_VERSION}"
+            echo "Build réussi pour ${env.APP_NAME}:${env.APP_VERSION}"
         }
 
         failure {
-            echo "❌ Échec du build ${env.APP_NAME ?: 'application inconnue'}"
+            echo "Echec du build ${env.APP_NAME ?: 'application inconnue'}"
         }
     }
 }
-```
