@@ -1,66 +1,114 @@
 pipeline {
+
     agent any
 
     environment {
-        DOCKER_CREDS = credentials('docker_hub')
-        ENV_FILE = readFile('.env').split("\n")
+        DOCKER_IMAGE = 'monuser/microapp'
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: "${env.BRANCH_NAME}", url: 'https://github.com/monrepo/my-app.git'
-            }
-        }
 
         stage('Charger .env') {
+
             steps {
+
                 script {
-                    for (line in ENV_FILE) {
-                        if (line.trim() && !line.startsWith('#')) {
-                            def parts = line.tokenize('=')
-                            env[parts[0]] = parts[1]
+
+                    def envFile = readFile('.env')
+
+                    envFile.split('\n').each { line ->
+
+                        line = line.trim()
+
+                        if (line && !line.startsWith('#')) {
+
+                            def parts = line.split('=', 2)
+
+                            if (parts.size() == 2) {
+
+                                def key = parts[0].trim()
+                                def value = parts[1].trim()
+
+                                env[key] = value
+                            }
                         }
                     }
-                    echo "Application : ${APP_NAME}"
-                    echo "Version : ${APP_VERSION}"
+
+                    echo "Application : ${env.APP_NAME}"
+                    echo "Port        : ${env.APP_PORT}"
+                    echo "Version     : ${env.APP_VERSION}"
                 }
             }
         }
 
         stage('Build Docker') {
+
             steps {
+
                 script {
-                    docker.build("${APP_NAME}:${APP_VERSION}")
+
+                    def image = "${env.DOCKER_IMAGE}:${env.APP_VERSION}"
+
+                    echo "🐳 Construction de l'image : ${image}"
+
+                    docker.build(image)
                 }
             }
         }
 
         stage('Push Docker') {
+
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker_hub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'docker_hub',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )
+                ]) {
+
                     sh '''
-                        echo "$PASS" | docker login -u "$USER" --password-stdin
-                        docker push ${APP_NAME}:${APP_VERSION}
+                        echo "$DOCKER_PASSWORD" | \
+                        docker login \
+                        -u "$DOCKER_USER" \
+                        --password-stdin
+
+                        docker push \
+                        "$DOCKER_IMAGE:$APP_VERSION"
                     '''
                 }
             }
         }
 
         stage('Deploy') {
-            when { branch 'main' }
+
+            when {
+                branch 'main'
+            }
+
             steps {
-                echo "Déploiement de ${APP_NAME}:${APP_VERSION} sur PROD..."
+
+                echo """
+                🚀 Déploiement en production
+
+                Application : ${env.APP_NAME}
+                Version     : ${env.APP_VERSION}
+                Port        : ${env.APP_PORT}
+                Image       : ${env.DOCKER_IMAGE}:${env.APP_VERSION}
+                """
             }
         }
     }
 
     post {
+
         success {
-            echo "✅ Build réussi pour ${APP_NAME}:${APP_VERSION}"
+            echo "✅ Pipeline terminé avec succès"
         }
+
         failure {
-            echo "❌ Échec du build ${APP_NAME}"
+            echo "❌ Pipeline en échec"
         }
     }
 }
