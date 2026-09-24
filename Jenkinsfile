@@ -5,7 +5,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: "${env.BRANCH_NAME}",
+                git branch: 'main',
                     url: 'https://github.com/bettaiebmedali/test-multi.git'
             }
         }
